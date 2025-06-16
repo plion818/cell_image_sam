@@ -19,11 +19,9 @@ if not os.path.exists(SAM_CHECKPOINT):
     print("[INFO] SAM 權重下載完成")
 
 MODEL_TYPE = "vit_h"
-# 讓路徑在 Windows/Colab/Linux 都能用
-if "google.colab" in sys.modules:
-    IMAGE_PATH = "images_masked/train/0-20_/3.tif"
-else:
-    IMAGE_PATH = os.path.join(os.getcwd(), "images_masked", "train", "0-20_", "3.tif")
+# 取得當前 script 目錄，並組合圖片路徑
+script_dir = os.path.dirname(os.path.abspath(__file__))
+IMAGE_PATH = os.path.join(script_dir, "images_masked", "train", "0-20_", "3.tif")
 DEVICE = "cuda" if cv2.cuda.getCudaEnabledDeviceCount() > 0 else "cpu"
 # ==========================
 
