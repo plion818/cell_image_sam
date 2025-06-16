@@ -67,8 +67,17 @@ try:
                 image = np.array(Image.open(img_path).convert("RGB"))
                 print(f"[DEBUG] 讀取圖片 shape: {image.shape}")
                 if MODEL_SELECT == 'cellpose' and HAS_CELLPOSE:
-                    cp_model = cellpose_models.Cellpose(model_type='cyto')
-                    masks, flows, styles, diams = cp_model.eval(image, diameter=None, channels=[0,0])
+                    # 支援新版與舊版 cellpose
+                    if hasattr(cellpose_models, 'CellposeModel'):
+                        cp_model = cellpose_models.CellposeModel(model_type='cyto')
+                    else:
+                        cp_model = cellpose_models.Cellpose(model_type='cyto')
+                    cp_result = cp_model.eval(image, diameter=None)
+                    if len(cp_result) == 4:
+                        masks, flows, styles, diams = cp_result
+                    else:
+                        masks, flows, diams = cp_result
+                        styles = None
                     mask_sum = (masks > 0).astype(np.uint8)
                     mask_count = masks.max()
                 else:
