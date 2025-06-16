@@ -39,6 +39,19 @@ try:
     train_dir = os.path.join(script_dir, "images_masked", "train")
     label_dict = {}
 
+    # 新增 cellpose 匯入
+    try:
+        from cellpose import models as cellpose_models
+        print("[INFO] 匯入 cellpose 成功")
+        HAS_CELLPOSE = True
+    except Exception as e:
+        print("[INFO] 匯入 cellpose 失敗：", e)
+        HAS_CELLPOSE = False
+
+    # 選擇模型：'sam' 或 'cellpose'
+    MODEL_SELECT = os.environ.get('SEG_MODEL', 'cellpose')  # 預設 cellpose
+    print(f"[INFO] 選擇模型: {MODEL_SELECT}")
+
     print(f"[INFO] 開始處理訓練資料夾: {train_dir}")
     for density_folder in os.listdir(train_dir):
         folder_path = os.path.join(train_dir, density_folder)
@@ -53,21 +66,25 @@ try:
             try:
                 image = np.array(Image.open(img_path).convert("RGB"))
                 print(f"[DEBUG] 讀取圖片 shape: {image.shape}")
-                print(f"[DEBUG] 開始呼叫 mask_generator.generate ...")
-                masks = mask_generator.generate(image)
-                print(f"[DEBUG] mask_generator.generate 完成，mask 數量: {len(masks)}")
-                # 合併所有 mask
-                mask_sum = np.zeros(image.shape[:2], dtype=np.uint8)
-                for m in masks:
-                    mask_sum = np.logical_or(mask_sum, m["segmentation"]).astype(np.uint8)
-                # 覆蓋率直接以全圖像素計算
+                if MODEL_SELECT == 'cellpose' and HAS_CELLPOSE:
+                    cp_model = cellpose_models.Cellpose(model_type='cyto')
+                    masks, flows, styles, diams = cp_model.eval(image, diameter=None, channels=[0,0])
+                    mask_sum = (masks > 0).astype(np.uint8)
+                    mask_count = masks.max()
+                else:
+                    print(f"[DEBUG] 開始呼叫 mask_generator.generate ...")
+                    masks = mask_generator.generate(image)
+                    print(f"[DEBUG] mask_generator.generate 完成，mask 數量: {len(masks)}")
+                    mask_sum = np.zeros(image.shape[:2], dtype=np.uint8)
+                    for m in masks:
+                        mask_sum = np.logical_or(mask_sum, m["segmentation"]).astype(np.uint8)
+                    mask_count = len(masks)
                 coverage = mask_sum.sum() / mask_sum.size
-                # 教師標籤同時記錄覆蓋率與 mask 數量
                 label_dict[img_path] = {
                     "coverage": coverage,
-                    "mask_count": len(masks)
+                    "mask_count": int(mask_count)
                 }
-                print(f"[INFO] {img_path}: 覆蓋率={coverage:.4f}, mask數={len(masks)}")
+                print(f"[INFO] {img_path}: 覆蓋率={coverage:.4f}, mask數={mask_count}")
             except Exception as img_e:
                 print(f"[錯誤] 處理圖片 {img_path} 失敗：{img_e}")
 

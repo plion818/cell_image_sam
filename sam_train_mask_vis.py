@@ -30,23 +30,41 @@ print("[INFO] 載入模型...")
 sam = sam_model_registry[MODEL_TYPE](checkpoint=SAM_CHECKPOINT).to(DEVICE)
 mask_generator = SamAutomaticMaskGenerator(sam)
 
+# 新增 cellpose 匯入
+try:
+    from cellpose import models as cellpose_models
+    print("[INFO] 匯入 cellpose 成功")
+    HAS_CELLPOSE = True
+except Exception as e:
+    print("[INFO] 匯入 cellpose 失敗：", e)
+    HAS_CELLPOSE = False
+
+# 選擇模型：'sam' 或 'cellpose'
+MODEL_SELECT = os.environ.get('SEG_MODEL', 'cellpose')  # 預設 cellpose
+print(f"[INFO] 選擇模型: {MODEL_SELECT}")
+
 # ======== 圖片讀取與遮罩推論 ========
 image = np.array(Image.open(IMAGE_PATH).convert("RGB"))
-masks = mask_generator.generate(image)
-
-# 合併遮罩為 binary mask
-final_mask = np.zeros(image.shape[:2], dtype=np.uint8)
-for m in masks:
-    final_mask |= m["segmentation"].astype(np.uint8)
+if MODEL_SELECT == 'cellpose' and HAS_CELLPOSE:
+    cp_model = cellpose_models.Cellpose(model_type='cyto')
+    masks, flows, styles, diams = cp_model.eval(image, diameter=None, channels=[0,0])
+    final_mask = (masks > 0).astype(np.uint8)
+    mask_count = masks.max()
+else:
+    masks = mask_generator.generate(image)
+    final_mask = np.zeros(image.shape[:2], dtype=np.uint8)
+    for m in masks:
+        final_mask |= m["segmentation"].astype(np.uint8)
+    mask_count = len(masks)
 
 # 覆蓋率直接以全圖像素計算
 coverage = final_mask.sum() / final_mask.size
-print(f"[INFO] coverage_ratio：{coverage:.2%}，mask_count：{len(masks)}")
+print(f"[INFO] coverage_ratio：{coverage:.2%}，mask_count：{mask_count}")
 
 # ======== 可視化疊圖 ========
 plt.figure(figsize=(6, 6))
 plt.imshow(image)
 plt.imshow(final_mask, alpha=0.4, cmap='Reds')
-plt.title(f"覆蓋率: {coverage:.2%}  mask數: {len(masks)}")
+plt.title(f"覆蓋率: {coverage:.2%}  mask數: {mask_count}")
 plt.axis("off")
 plt.show()
