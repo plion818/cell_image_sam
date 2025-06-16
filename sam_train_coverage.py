@@ -34,8 +34,9 @@ try:
     mask_generator = SamAutomaticMaskGenerator(sam)
     print("[INFO] SAM 初始化完成")
 
-    # 處理所有訓練圖片
-    train_dir = os.path.join("AI_MSC_密度照片", "train")
+    # 取得當前 script 目錄
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    train_dir = os.path.join(script_dir, "AI_MSC_密度照片", "train")
     label_dict = {}
 
     print(f"[INFO] 開始處理訓練資料夾: {train_dir}")
