@@ -56,19 +56,12 @@ try:
                 print(f"[DEBUG] 開始呼叫 mask_generator.generate ...")
                 masks = mask_generator.generate(image)
                 print(f"[DEBUG] mask_generator.generate 完成，mask 數量: {len(masks)}")
-                # 建立黑色遮蔽區域 mask（假設黑色為 [0,0,0]）
-                black_mask = np.all(image == [0, 0, 0], axis=-1)
-                valid_area = ~black_mask
                 # 合併所有 mask
                 mask_sum = np.zeros(image.shape[:2], dtype=np.uint8)
                 for m in masks:
                     mask_sum = np.logical_or(mask_sum, m["segmentation"]).astype(np.uint8)
-                # 只計算非黑色區域的覆蓋率
-                valid_pixel_count = np.count_nonzero(valid_area)
-                if valid_pixel_count == 0:
-                    coverage = 0.0
-                else:
-                    coverage = (mask_sum & valid_area).sum() / valid_pixel_count
+                # 覆蓋率直接以全圖像素計算
+                coverage = mask_sum.sum() / mask_sum.size
                 # 教師標籤同時記錄覆蓋率與 mask 數量
                 label_dict[img_path] = {
                     "coverage": coverage,

@@ -39,14 +39,8 @@ final_mask = np.zeros(image.shape[:2], dtype=np.uint8)
 for m in masks:
     final_mask |= m["segmentation"].astype(np.uint8)
 
-# 建立黑色遮蔽區域 mask（假設黑色為 [0,0,0]）
-black_mask = np.all(image == [0, 0, 0], axis=-1)
-valid_area = ~black_mask
-valid_pixel_count = np.count_nonzero(valid_area)
-if valid_pixel_count == 0:
-    coverage = 0.0
-else:
-    coverage = (final_mask & valid_area).sum() / valid_pixel_count
+# 覆蓋率直接以全圖像素計算
+coverage = final_mask.sum() / final_mask.size
 print(f"[INFO] coverage_ratio：{coverage:.2%}，mask_count：{len(masks)}")
 
 # ======== 可視化疊圖 ========
