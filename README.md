@@ -25,4 +25,7 @@ python sam_train_coverage.py
 ## 輸出
 - `train_coverage_labels.json`：每張訓練圖片的覆蓋率教師標籤。
 
+MASK_LEFT_BOTTOM = (98, 1505, 470, 45)     # 遮左下角時間戳（黑底黃字）
+MASK_RIGHT_BOTTOM = (1255, 1451, 260, 56)  # 遮右下角 200μm 10x 倍率標註
+
 如有任何問題，歡迎提出！
