@@ -80,10 +80,19 @@ else:
 coverage = final_mask.sum() / final_mask.size
 print(f"[INFO] coverage_ratio：{coverage:.2%}，mask_count：{mask_count}")
 
+# 產生自訂圖片名稱
+parent_folder = os.path.basename(os.path.dirname(IMAGE_PATH))
+file_name = os.path.basename(IMAGE_PATH)
+if parent_folder.endswith('_'):
+    percent_name = parent_folder.replace('_', '%_')
+else:
+    percent_name = parent_folder
+custom_img_name = f"{percent_name}{file_name}"
+
 # ======== 可視化疊圖 ========
 plt.figure(figsize=(6, 6))
 plt.imshow(image)
 plt.imshow(final_mask, alpha=0.4, cmap='Reds')
-plt.title(f"coverage_ratio: {coverage:.2%}  mask_count: {mask_count}")
+plt.title(f"覆蓋率: {coverage:.2%}  mask數: {mask_count}\n{custom_img_name}")
 plt.axis("off")
 plt.show()

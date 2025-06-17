@@ -42,51 +42,9 @@ except Exception as e:
 CELLP_PROB_THRESHOLD = -4   # 提高微弱細胞區域的檢出率，預設值=0.0
 FLOW_THRESHOLD = 0.2        # 提高細胞邊界的檢出率，預設值=0.4
 
-# ======== 圖片讀取與遮罩推論 ========
+# ======== 圖片路徑基礎設定 ========
 script_dir = os.path.dirname(os.path.abspath(__file__))
 train_dir = os.path.join(script_dir, "images_masked", "train")
-# 預設選擇一張圖片作為測試
-IMAGE_PATH = os.path.join(train_dir, "0-20_", "3.tif")
-image = np.array(Image.open(IMAGE_PATH).convert("RGB"))
-if MODEL_SELECT == 'cellpose' and HAS_CELLPOSE:
-    # 支援新版與舊版 cellpose
-    if hasattr(cellpose_models, 'CellposeModel'):
-        cp_model = cellpose_models.CellposeModel(model_type='cyto')
-    else:
-        cp_model = cellpose_models.Cellpose(model_type='cyto')
-    cp_result = cp_model.eval(
-        image,
-        diameter=None,
-        cellprob_threshold=CELLP_PROB_THRESHOLD,
-        flow_threshold=FLOW_THRESHOLD
-    )
-    if len(cp_result) == 4:
-        masks, flows, styles, diams = cp_result
-    else:
-        masks, flows, diams = cp_result
-        styles = None
-    final_mask = (masks > 0).astype(np.uint8)
-    mask_count = masks.max()
-else:
-    if mask_generator is None:
-        raise RuntimeError("[錯誤] 未初始化 SAM，請確認模型選擇與權重下載！")
-    masks = mask_generator.generate(image)
-    final_mask = np.zeros(image.shape[:2], dtype=np.uint8)
-    for m in masks:
-        final_mask |= m["segmentation"].astype(np.uint8)
-    mask_count = len(masks)
-
-# 覆蓋率直接以全圖像素計算
-coverage = final_mask.sum() / final_mask.size
-print(f"[INFO] coverage_ratio：{coverage:.2%}，mask_count：{mask_count}")
-
-# ======== 可視化疊圖 ========
-plt.figure(figsize=(6, 6))
-plt.imshow(image)
-plt.imshow(final_mask, alpha=0.4, cmap='Reds')
-plt.title(f"coverage_ratio: {coverage:.2%}  mask_count: {mask_count}")
-plt.axis("off")
-plt.show()
 
 # ======== 參數組合與圖片清單 ========
 CELLP_PROB_THRESHOLD_LIST = [-4]
@@ -133,9 +91,18 @@ for cellprob in CELLP_PROB_THRESHOLD_LIST:
                 mask_count = len(masks)
             coverage = final_mask.sum() / final_mask.size
             print(f"[INFO] coverage_ratio：{coverage:.2%}，mask_count：{mask_count}")
+
+            # 產生自訂圖片名稱
+            parent_folder = os.path.basename(os.path.dirname(img_path))
+            file_name = os.path.basename(img_path)
+            if parent_folder.endswith('_'):
+                percent_name = parent_folder.replace('_', '%_')
+            else:
+                percent_name = parent_folder
+            custom_img_name = f"{percent_name}{file_name}"
             plt.figure(figsize=(6, 6))
             plt.imshow(image)
             plt.imshow(final_mask, alpha=0.4, cmap='Reds')
-            plt.title(f"cellprob={cellprob}, flow={flow}\n覆蓋率: {coverage:.2%}  mask數: {mask_count}\n{os.path.basename(img_path)}")
+            plt.title(f"cellprob={cellprob}, flow={flow}\n覆蓋率: {coverage:.2%}  mask數: {mask_count}\n{custom_img_name}")
             plt.axis("off")
             plt.show()
