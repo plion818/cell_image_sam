@@ -38,10 +38,6 @@ except Exception as e:
     print("[INFO] 匯入 cellpose 失敗：", e)
     HAS_CELLPOSE = False
 
-# cellpose 參數設置
-CELLP_PROB_THRESHOLD = -4   # 提高微弱細胞區域的檢出率，預設值=0.0
-FLOW_THRESHOLD = 0.2        # 提高細胞邊界的檢出率，預設值=0.4
-
 # ======== 圖片路徑基礎設定 ========
 script_dir = os.path.dirname(os.path.abspath(__file__))
 train_dir = os.path.join(script_dir, "images_masked", "train")
@@ -51,7 +47,7 @@ CELLP_PROB_THRESHOLD_LIST = [-4]
 FLOW_THRESHOLD_LIST = [0.8, 0.9]
 image_path_list = [
     os.path.join(train_dir, "0-20_", "1.tif"),
-    os.path.join(train_dir, "20-40_", "1.tif"),
+    os.path.join(train_dir, "20-40_", "2.tif"),
     os.path.join(train_dir, "40-60_", "1.tif"),
     os.path.join(train_dir, "60-80_", "1.tif"),
     os.path.join(train_dir, "80-100_", "1.tif"),
