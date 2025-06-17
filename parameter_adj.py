@@ -99,6 +99,6 @@ for cellprob in CELLP_PROB_THRESHOLD_LIST:
             plt.figure(figsize=(6, 6))
             plt.imshow(image)
             plt.imshow(final_mask, alpha=0.4, cmap='Reds')
-            plt.title(f"cellprob={cellprob}, flow={flow}\n覆蓋率: {coverage:.2%}  mask數: {mask_count}\n{custom_img_name}")
+            plt.title(f"cellprob={cellprob}, flow={flow}\ncoverage_ratio: {coverage:.2%}  mask_count: {mask_count}\n{custom_img_name}")
             plt.axis("off")
             plt.show()
