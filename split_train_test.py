@@ -24,7 +24,7 @@ for interval in interval_folders:
     images = [f for f in os.listdir(src_folder) if f.lower().endswith('.tif')]
     random.shuffle(images)
     n_total = len(images)
-    n_train = int(n_total * 0.6)
+    n_train = int(n_total * 0.8)  # 80% 用於訓練集
     train_images = images[:n_train]
     test_images = images[n_train:]
 

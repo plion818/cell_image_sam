@@ -9,11 +9,29 @@
 3. 執行程式，批次處理所有訓練圖片，計算覆蓋率並儲存教師標籤。
 
 ## 安裝相依套件
-請在 PowerShell 執行下列指令：
+
+### 本地安裝
+建議直接安裝 requirements.txt 內所有相依套件：
 
 ```powershell
-pip install git+https://github.com/facebookresearch/segment-anything.git torch torchvision opencv-python pillow
+pip install -r requirements.txt
 ```
+
+### Colab 或需最新版 segment-anything
+若在 Colab 或需安裝最新版 segment-anything，請使用：
+
+```python
+!pip install git+https://github.com/facebookresearch/segment-anything.git torch torchvision opencv-python pillow
+```
+
+- Colab 環境每次重啟都需重新安裝。
+- 若需特定 CUDA 版本，請依 PyTorch 官網指示安裝 torch/torchvision。
+
+## segment-anything 套件內容
+- SAM 模型架構與推論 API
+- 權重載入（不自動下載權重，需手動或程式下載）
+- 自動遮罩產生器與分割工具
+- 需搭配 PyTorch 執行
 
 ## 執行方式
 安裝完成後，執行 `sam_train_coverage.py`，程式會自動下載 SAM 權重並處理所有訓練圖片。
