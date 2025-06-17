@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import json
 import sys
+import csv
 
 print("[INFO] 程式開始執行")
 try:
@@ -107,8 +108,10 @@ for density_folder in os.listdir(train_dir):
         except Exception as img_e:
             print(f"[錯誤] 處理圖片 {img_path} 失敗：{img_e}")
 
-# 儲存教師標籤
-with open("train_coverage_labels.json", "w", encoding="utf-8") as f:
-    json.dump(label_dict, f, ensure_ascii=False, indent=2)
-
-print("[INFO] 已完成所有圖片分割與覆蓋率計算，教師標籤已儲存 train_coverage_labels.json")
+# 儲存教師標籤為 CSV
+with open("train_coverage_labels.csv", "w", encoding="utf-8", newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(["image_path", "coverage_ratio", "mask_count"])
+    for img_path, info in label_dict.items():
+        writer.writerow([img_path, info["coverage"], info["mask_count"]])
+print("[INFO] 已完成所有圖片分割與覆蓋率計算，教師標籤已儲存 train_coverage_labels.csv")
