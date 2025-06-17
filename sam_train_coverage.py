@@ -111,7 +111,13 @@ for density_folder in os.listdir(train_dir):
 # 儲存教師標籤為 CSV
 with open("train_coverage_labels.csv", "w", encoding="utf-8", newline='') as f:
     writer = csv.writer(f)
-    writer.writerow(["image_path", "coverage_ratio", "mask_count"])
+    writer.writerow(["image_path", "coverage_ratio", "mask_count", "label"])
     for img_path, info in label_dict.items():
-        writer.writerow([img_path, info["coverage"], info["mask_count"]])
+        # 取得 label（百分比格式）
+        folder = os.path.basename(os.path.dirname(img_path))
+        if folder.endswith('_'):
+            label = folder.replace('_', '%')
+        else:
+            label = folder
+        writer.writerow([img_path, info["coverage"], info["mask_count"], label])
 print("[INFO] 已完成所有圖片分割與覆蓋率計算，教師標籤已儲存 train_coverage_labels.csv")
