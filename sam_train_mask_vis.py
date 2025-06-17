@@ -39,6 +39,10 @@ except Exception as e:
     HAS_CELLPOSE = False
 
 # ======== 圖片讀取與遮罩推論 ========
+script_dir = os.path.dirname(os.path.abspath(__file__))
+train_dir = os.path.join(script_dir, "images_masked", "train")
+# 預設選擇一張圖片作為測試
+IMAGE_PATH = os.path.join(train_dir, "0-20_", "3.tif")
 image = np.array(Image.open(IMAGE_PATH).convert("RGB"))
 if MODEL_SELECT == 'cellpose' and HAS_CELLPOSE:
     # 支援新版與舊版 cellpose
