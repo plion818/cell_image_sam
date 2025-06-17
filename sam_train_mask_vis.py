@@ -39,8 +39,8 @@ except Exception as e:
     HAS_CELLPOSE = False
 
 # cellpose 參數設置
-CELLP_PROB_THRESHOLD = -4   # 提高微弱細胞區域的檢出率，預設值=0.0
-FLOW_THRESHOLD = 0.2        # 提高細胞邊界的檢出率，預設值=0.4
+CELLP_PROB_THRESHOLD = 0.0   # 提高微弱細胞區域的檢出率，預設值=0.0
+FLOW_THRESHOLD = 0.4        # 提高細胞邊界的檢出率，預設值=0.4
 
 # ======== 圖片讀取與遮罩推論 ========
 script_dir = os.path.dirname(os.path.abspath(__file__))

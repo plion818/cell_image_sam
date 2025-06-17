@@ -51,6 +51,10 @@ except Exception as e:
     print("[INFO] 匯入 cellpose 失敗：", e)
     HAS_CELLPOSE = False
 
+# cellpose 參數設置
+CELLP_PROB_THRESHOLD = -4   # 提高微弱細胞區域的檢出率，預設值=0.0
+FLOW_THRESHOLD = 1.0        # 提高細胞邊界的檢出率，預設值=0.4
+
 print(f"[INFO] 開始處理訓練資料夾: {train_dir}")
 for density_folder in os.listdir(train_dir):
     folder_path = os.path.join(train_dir, density_folder)
@@ -71,7 +75,12 @@ for density_folder in os.listdir(train_dir):
                     cp_model = cellpose_models.CellposeModel(model_type='cyto')
                 else:
                     cp_model = cellpose_models.Cellpose(model_type='cyto')
-                cp_result = cp_model.eval(image, diameter=None)
+                cp_result = cp_model.eval(
+                    image,
+                    diameter=None,
+                    cellprob_threshold=CELLP_PROB_THRESHOLD,
+                    flow_threshold=FLOW_THRESHOLD
+                )
                 if len(cp_result) == 4:
                     masks, flows, styles, diams = cp_result
                 else:
