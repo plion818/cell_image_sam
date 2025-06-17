@@ -87,3 +87,55 @@ plt.imshow(final_mask, alpha=0.4, cmap='Reds')
 plt.title(f"coverage_ratio: {coverage:.2%}  mask_count: {mask_count}")
 plt.axis("off")
 plt.show()
+
+# ======== 參數組合與圖片清單 ========
+CELLP_PROB_THRESHOLD_LIST = [-4]
+FLOW_THRESHOLD_LIST = [0.8, 0.9]
+image_path_list = [
+    os.path.join(train_dir, "0-20_", "1.tif"),
+    os.path.join(train_dir, "20-40_", "1.tif"),
+    os.path.join(train_dir, "40-60_", "1.tif"),
+    os.path.join(train_dir, "60-80_", "1.tif"),
+    os.path.join(train_dir, "80-100_", "1.tif"),
+]
+
+# ======== 批次測試所有組合 ========
+for cellprob in CELLP_PROB_THRESHOLD_LIST:
+    for flow in FLOW_THRESHOLD_LIST:
+        for img_path in image_path_list:
+            print(f"[INFO] 處理: cellprob={cellprob}, flow={flow}, img={img_path}")
+            image = np.array(Image.open(img_path).convert("RGB"))
+            if MODEL_SELECT == 'cellpose' and HAS_CELLPOSE:
+                if hasattr(cellpose_models, 'CellposeModel'):
+                    cp_model = cellpose_models.CellposeModel(model_type='cyto')
+                else:
+                    cp_model = cellpose_models.Cellpose(model_type='cyto')
+                cp_result = cp_model.eval(
+                    image,
+                    diameter=None,
+                    cellprob_threshold=cellprob,
+                    flow_threshold=flow
+                )
+                if len(cp_result) == 4:
+                    masks, flows, styles, diams = cp_result
+                else:
+                    masks, flows, diams = cp_result
+                    styles = None
+                final_mask = (masks > 0).astype(np.uint8)
+                mask_count = masks.max()
+            else:
+                if mask_generator is None:
+                    raise RuntimeError("[錯誤] 未初始化 SAM，請確認模型選擇與權重下載！")
+                masks = mask_generator.generate(image)
+                final_mask = np.zeros(image.shape[:2], dtype=np.uint8)
+                for m in masks:
+                    final_mask |= m["segmentation"].astype(np.uint8)
+                mask_count = len(masks)
+            coverage = final_mask.sum() / final_mask.size
+            print(f"[INFO] coverage_ratio：{coverage:.2%}，mask_count：{mask_count}")
+            plt.figure(figsize=(6, 6))
+            plt.imshow(image)
+            plt.imshow(final_mask, alpha=0.4, cmap='Reds')
+            plt.title(f"cellprob={cellprob}, flow={flow}\n覆蓋率: {coverage:.2%}  mask數: {mask_count}\n{os.path.basename(img_path)}")
+            plt.axis("off")
+            plt.show()
