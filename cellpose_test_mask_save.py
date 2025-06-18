@@ -45,6 +45,7 @@ for folder in os.listdir(test_dir):
         img_path = os.path.join(folder_path, img_name)
         print(f"[INFO] 處理圖片: {img_path}")
         image = np.array(Image.open(img_path).convert("RGB"))
+        print(f"[DEBUG] 讀取圖片 shape: {image.shape}")
         cp_result = cp_model.eval(
             image,
             diameter=None,
@@ -59,9 +60,9 @@ for folder in os.listdir(test_dir):
         mask_img = (masks > 0).astype(np.uint8) * 255
         save_path = os.path.join(out_folder, img_name)
         cv2.imwrite(save_path, mask_img)
-        print(f"[INFO] 已儲存: {save_path}")
         coverage = (mask_img > 0).sum() / mask_img.size
         mask_count = masks.max()
+        print(f"[INFO] {img_path}: 覆蓋率={coverage:.4f}, mask數={mask_count}")
         label_dict[img_path] = {
             "coverage_ratio": coverage,
             "mask_count": mask_count
