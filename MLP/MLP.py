@@ -8,8 +8,12 @@ import torch.optim as optim
 from collections import Counter
 import numpy as np
 
-# 讀取 CSV
-df = pd.read_csv("train_coverage_labels.csv")
+# 讀取 CSV，路徑以 cell_sam 專案根目錄為基準
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)  # cell_sam 目錄
+csv_path = os.path.join(project_root, "output", "train_coverage_labels.csv")
+df = pd.read_csv(csv_path)
 
 # 特徵與標籤
 X = df[["coverage_ratio", "mask_count"]].values
@@ -76,14 +80,14 @@ val_loader = DataLoader(val_dataset, batch_size=32)
 # print(f"訓練集數量: {len(train_dataset)}，驗證集數量: {len(val_dataset)}")
 
 # 顯示訓練集與驗證集每個label的樣本數
-train_label_counts = Counter(y_train)
-val_label_counts = Counter(y_val)
-print("訓練集各類別樣本數：")
-for label, idx in zip(le.classes_, range(len(le.classes_))):
-    print(f"  {label}: {train_label_counts[idx]}")
-print("驗證集各類別樣本數：")
-for label, idx in zip(le.classes_, range(len(le.classes_))):
-    print(f"  {label}: {val_label_counts[idx]}")
+# train_label_counts = Counter(y_train)
+# val_label_counts = Counter(y_val)
+# print("訓練集各類別樣本數：")
+# for label, idx in zip(le.classes_, range(len(le.classes_))):
+#     print(f"  {label}: {train_label_counts[idx]}")
+# print("驗證集各類別樣本數：")
+# for label, idx in zip(le.classes_, range(len(le.classes_))):
+#     print(f"  {label}: {val_label_counts[idx]}")
 
 # 定義簡單 MLP 分類模型
 class MLPClassifier(nn.Module):
@@ -99,60 +103,63 @@ class MLPClassifier(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-# 取得類別數
-num_classes = len(set(y_train))
-model = MLPClassifier(input_dim=2, num_classes=num_classes)
 
-# 設定 loss 與 optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+if __name__ == "__main__":
+    # 取得類別數
+    num_classes = len(set(y_train))
+    model = MLPClassifier(input_dim=2, num_classes=num_classes)
 
-# Early stopping 參數
-patience = 10
-best_val_acc = 0
-patience_counter = 0
-best_model_state = None
+    # 設定 loss 與 optimizer
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
 
-# 訓練模型
-num_epochs = 50
-for epoch in range(num_epochs):
-    model.train()
-    total_loss = 0
-    for X_batch, y_batch in train_loader:
-        optimizer.zero_grad()
-        outputs = model(X_batch)
-        loss = criterion(outputs, y_batch)
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item() * X_batch.size(0)
-    avg_loss = total_loss / len(train_loader.dataset)
-    # 驗證
-    model.eval()
-    correct = 0
-    total = 0
-    with torch.no_grad():
-        for X_batch, y_batch in val_loader:
+    # Early stopping 參數
+    patience = 20
+    best_val_acc = 0
+    patience_counter = 0
+    best_model_state = None
+
+    # 訓練模型
+    num_epochs = 100
+    for epoch in range(num_epochs):
+        model.train()
+        total_loss = 0
+        for X_batch, y_batch in train_loader:
+            optimizer.zero_grad()
             outputs = model(X_batch)
-            _, predicted = torch.max(outputs, 1)
-            correct += (predicted == y_batch).sum().item()
-            total += y_batch.size(0)
-    val_acc = correct / total
-    print(f"Epoch {epoch+1}/{num_epochs} - train_loss: {avg_loss:.4f} - val_acc: {val_acc:.4f}")
-    # Early stopping 檢查
-    if val_acc > best_val_acc:
-        best_val_acc = val_acc
-        patience_counter = 0
-        best_model_state = model.state_dict()
-    else:
-        patience_counter += 1
-        if patience_counter >= patience:
-            print(f"[EarlyStopping] val_acc 已 {patience} 次未提升，提前停止訓練。")
-            break
-# 回復最佳模型
-if best_model_state is not None:
-    model.load_state_dict(best_model_state)
-    print(f"[INFO] 已回復最佳模型 (val_acc={best_val_acc:.4f})")
+            loss = criterion(outputs, y_batch)
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item() * X_batch.size(0)
+        avg_loss = total_loss / len(train_loader.dataset)
+        # 驗證
+        model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for X_batch, y_batch in val_loader:
+                outputs = model(X_batch)
+                _, predicted = torch.max(outputs, 1)
+                correct += (predicted == y_batch).sum().item()
+                total += y_batch.size(0)
+        val_acc = correct / total
+        print(f"Epoch {epoch+1}/{num_epochs} - train_loss: {avg_loss:.4f} - val_acc: {val_acc:.4f}")
+        # Early stopping 檢查
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            patience_counter = 0
+            best_model_state = model.state_dict()
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"[EarlyStopping] val_acc 已 {patience} 次未提升，提前停止訓練。")
+                break
+    # 回復最佳模型
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+        print(f"[INFO] 已回復最佳模型 (val_acc={best_val_acc:.4f})")
 
-# 訓練結束後儲存模型
-torch.save(model.state_dict(), 'mlp_classifier.pth')
-print('模型已儲存為 mlp_classifier.pth')
+    # 訓練結束後儲存模型（儲存在 MLP 資料夾下）
+    model_save_path = os.path.join(script_dir, 'mlp_classifier.pth')
+    torch.save(model.state_dict(), model_save_path)
+    print(f'模型已儲存為 {model_save_path}')

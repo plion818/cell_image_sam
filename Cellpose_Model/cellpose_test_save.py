@@ -24,10 +24,13 @@ if hasattr(cellpose_models, 'CellposeModel'):
 else:
     cp_model = cellpose_models.Cellpose(model_type='cyto')
 
+
+# 以 cell_sam 專案根目錄為基準
 script_dir = os.path.dirname(os.path.abspath(__file__))
-test_dir = os.path.join(script_dir, "images_masked", "test")
-out_dir = os.path.join(script_dir, "cellpose_test_mask")
-os.makedirs(out_dir, exist_ok=True)
+project_root = os.path.dirname(os.path.dirname(script_dir))
+test_dir = os.path.join(project_root, "images_masked", "test")
+output_dir = os.path.join(project_root, "output")
+os.makedirs(output_dir, exist_ok=True)
 
 label_dict = {}
 
@@ -37,8 +40,7 @@ for folder in os.listdir(test_dir):
     if not os.path.isdir(folder_path):
         continue
     print(f"[INFO] 處理子資料夾: {folder_path}")
-    out_folder = os.path.join(out_dir, folder)
-    os.makedirs(out_folder, exist_ok=True)
+    # 不再建立分割圖片資料夾
     for img_name in os.listdir(folder_path):
         if not img_name.lower().endswith(('.tif', '.png', '.jpg', '.jpeg')):
             continue
@@ -58,8 +60,6 @@ for folder in os.listdir(test_dir):
             masks, flows, diams = cp_result
             styles = None
         mask_img = (masks > 0).astype(np.uint8) * 255
-        save_path = os.path.join(out_folder, img_name)
-        cv2.imwrite(save_path, mask_img)
         coverage = (mask_img > 0).sum() / mask_img.size
         mask_count = masks.max()
         print(f"[INFO] {img_path}: 覆蓋率={coverage:.4f}, mask數={mask_count}")
@@ -69,7 +69,7 @@ for folder in os.listdir(test_dir):
         }
 
 # 儲存 CSV
-csv_path = os.path.join(out_dir, "test_coverage_labels.csv")
+csv_path = os.path.join(output_dir, "test_coverage_labels.csv")
 with open(csv_path, "w", encoding="utf-8", newline='') as f:
     writer = csv.writer(f)
     writer.writerow(["image_path", "coverage_ratio", "mask_count"])

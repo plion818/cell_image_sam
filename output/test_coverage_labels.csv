@@ -1,0 +1,11 @@
+image_path,coverage_ratio,mask_count,label
+/content/cell_image_sam/images_masked/test/80-100_/4.tif,0.843378906,4278,80-100%
+/content/cell_image_sam/images_masked/test/80-100_/2.tif,0.521996094,1322,80-100%
+/content/cell_image_sam/images_masked/test/20-40_/1.tif,0.364480469,859,20-40%
+/content/cell_image_sam/images_masked/test/20-40_/7.tif,0.440176563,809,20-40%
+/content/cell_image_sam/images_masked/test/60-80_/2.tif,0.645580469,2074,60-80%
+/content/cell_image_sam/images_masked/test/60-80_/3.tif,0.564715234,1280,60-80%
+/content/cell_image_sam/images_masked/test/0-20_/7.tif,0.3051625,559,0-20%
+/content/cell_image_sam/images_masked/test/0-20_/8.tif,0.268698047,471,0-20%
+/content/cell_image_sam/images_masked/test/40-60_/5.tif,0.52543125,1171,40-60%
+/content/cell_image_sam/images_masked/test/40-60_/3.tif,0.415529297,826,40-60%

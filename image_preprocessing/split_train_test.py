@@ -5,9 +5,11 @@ import random
 # 設定隨機種子以確保可重現性
 random.seed(40)
 
+# 取得 cell_sam 專案根目錄
 script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
 # 原始資料夾路徑
-base_dir = os.path.join(script_dir, 'images_masked')
+base_dir = os.path.join(project_root, 'images_masked')
 # 訓練集與測試集資料夾名稱
 train_dir = os.path.join(base_dir, 'train')
 test_dir = os.path.join(base_dir, 'test')

@@ -40,7 +40,8 @@ except Exception as e:
 
 # ======== 圖片路徑基礎設定 ========
 script_dir = os.path.dirname(os.path.abspath(__file__))
-train_dir = os.path.join(script_dir, "images_masked", "train")
+project_root = os.path.dirname(os.path.dirname(script_dir))
+train_dir = os.path.join(project_root, "images_masked", "train")
 
 # ======== 參數組合與圖片清單 ========
 CELLP_PROB_THRESHOLD_LIST = [-4]

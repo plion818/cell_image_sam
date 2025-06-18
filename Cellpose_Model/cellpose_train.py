@@ -38,9 +38,12 @@ if MODEL_SELECT == 'sam':
     mask_generator = SamAutomaticMaskGenerator(sam)
     print("[INFO] SAM 初始化完成")
 
-# 取得當前 script 目錄
+# 取得 cell_sam 專案根目錄
 script_dir = os.path.dirname(os.path.abspath(__file__))
-train_dir = os.path.join(script_dir, "images_masked", "train")
+project_root = os.path.dirname(os.path.dirname(script_dir))
+train_dir = os.path.join(project_root, "images_masked", "train")
+output_dir = os.path.join(project_root, "output")
+os.makedirs(output_dir, exist_ok=True)
 label_dict = {}
 
 # 新增 cellpose 匯入
@@ -109,7 +112,8 @@ for density_folder in os.listdir(train_dir):
             print(f"[錯誤] 處理圖片 {img_path} 失敗：{img_e}")
 
 # 儲存教師標籤為 CSV
-with open("train_coverage_labels.csv", "w", encoding="utf-8", newline='') as f:
+csv_path = os.path.join(output_dir, "train_coverage_labels.csv")
+with open(csv_path, "w", encoding="utf-8", newline='') as f:
     writer = csv.writer(f)
     writer.writerow(["image_path", "coverage_ratio", "mask_count", "label"])
     for img_path, info in label_dict.items():
@@ -120,4 +124,4 @@ with open("train_coverage_labels.csv", "w", encoding="utf-8", newline='') as f:
         else:
             label = folder
         writer.writerow([img_path, info["coverage"], info["mask_count"], label])
-print("[INFO] 已完成所有圖片分割與覆蓋率計算，教師標籤已儲存 train_coverage_labels.csv")
+print(f"[INFO] 已完成所有圖片分割與覆蓋率計算，教師標籤已儲存 {csv_path}")

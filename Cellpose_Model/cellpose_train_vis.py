@@ -44,7 +44,9 @@ FLOW_THRESHOLD = 0.4        # 提高細胞邊界的檢出率，預設值=0.4
 
 # ======== 圖片讀取與遮罩推論 ========
 script_dir = os.path.dirname(os.path.abspath(__file__))
-train_dir = os.path.join(script_dir, "images_masked", "train")
+# 以 cell_sam 專案根目錄為基準
+project_root = os.path.dirname(os.path.dirname(script_dir))
+train_dir = os.path.join(project_root, "images_masked", "train")
 # 預設選擇一張圖片作為測試
 IMAGE_PATH = os.path.join(train_dir, "0-20_", "3.tif")
 image = np.array(Image.open(IMAGE_PATH).convert("RGB"))
