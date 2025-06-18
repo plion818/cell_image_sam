@@ -12,7 +12,7 @@ if img is None:
     raise FileNotFoundError(f"找不到圖片: {img_path}")
 
 # CLAHE 對比增強
-clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
 enhanced = clahe.apply(img)
 
 # 顯示原圖與增強後影像

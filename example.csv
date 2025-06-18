@@ -1,8 +1,0 @@
-﻿image_path,coverage_ratio,mask_count,label
-/home/tl_admin/Documents/cell_image_sam/images_masked/train/0-20_/2.tif,0.164529297,304,0-20%
-/home/tl_admin/Documents/cell_image_sam/images_masked/train/0-20_/1.tif,0.092062109,162,0-20%
-/home/tl_admin/Documents/cell_image_sam/images_masked/train/0-20_/5.tif,0.135316797,216,0-20%
-/home/tl_admin/Documents/cell_image_sam/images_masked/train/20-40_/9.tif,0.301648828,846,20-40%
-/home/tl_admin/Documents/cell_image_sam/images_masked/train/40-60_/2.tif,0.301648828,846,40-60%
-/home/tl_admin/Documents/cell_image_sam/images_masked/train/60-80_/1.tif,0.275703906,807,60-80%
-/home/tl_admin/Documents/cell_image_sam/images_masked/train/80-100_/1.tif,0.119177344,444,80-100%
