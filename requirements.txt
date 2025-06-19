@@ -5,3 +5,4 @@ Pillow
 segment-anything
 cellpose
 lightgbm
+xgboost
