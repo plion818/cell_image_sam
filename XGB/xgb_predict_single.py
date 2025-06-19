@@ -4,7 +4,7 @@ import numpy as np
 
 # 載入模型、label encoder
 script_dir = os.path.dirname(os.path.abspath(__file__))
-rf = joblib.load(os.path.join(script_dir, 'rf_model.pkl'))
+xgb = joblib.load(os.path.join(script_dir, 'xgb_model.pkl'))
 le = joblib.load(os.path.join(script_dir, 'le.pkl'))
 
 while True:
@@ -12,7 +12,7 @@ while True:
     coverage_ratio = float(input("coverage_ratio: "))
     mask_count = float(input("mask_count: "))
     X_test = np.array([[coverage_ratio, mask_count]])
-    probs = rf.predict_proba(X_test)[0]
+    probs = xgb.predict_proba(X_test)[0]
     pred_idx = np.argmax(probs)
     pred_label = le.inverse_transform([pred_idx])[0]
     print(f"模型預測分類結果：{pred_label}")

@@ -4,3 +4,4 @@ matplotlib
 Pillow
 segment-anything
 cellpose
+lightgbm
