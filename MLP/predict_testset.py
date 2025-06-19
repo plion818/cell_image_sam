@@ -1,7 +1,8 @@
 import os
 import torch
 import pandas as pd
-from MLP import MLPClassifier, scaler, le
+from MLP import MLPClassifier, le
+import joblib
 
 # 設定路徑
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +27,9 @@ else:
     y_true = None
     y_true_encoded = None
 
+# 載入 scaler
+scaler_path = os.path.join(script_dir, 'scaler.pkl')
+scaler = joblib.load(scaler_path)
 # 標準化
 X_test_scaled = scaler.transform(X_test)
 X_test_tensor = torch.tensor(X_test_scaled, dtype=torch.float32)

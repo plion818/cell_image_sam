@@ -1,7 +1,9 @@
 import torch
+import torch.nn.functional as F
 import joblib
 import pandas as pd
-from MLP import MLPClassifier, scaler, le
+from MLP import MLPClassifier, le
+import joblib
 
 # 載入訓練好的模型（以 cell_sam 專案根目錄為基準）
 import os
@@ -19,17 +21,25 @@ while True:
     coverage_ratio = float(input("coverage_ratio: "))
     mask_count = float(input("mask_count: "))
 
+    # 載入 scaler
+    scaler_path = os.path.join(script_dir, 'scaler.pkl')
+    scaler = joblib.load(scaler_path)
     # 標準化
     X_test = scaler.transform([[coverage_ratio, mask_count]])
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
 
+
     # 預測
     with torch.no_grad():
         output = model(X_test_tensor)
+        probs = F.softmax(output, dim=1).cpu().numpy()[0]
         pred_idx = torch.argmax(output, dim=1).item()
         pred_label = le.inverse_transform([pred_idx])[0]
 
     print(f"模型預測分類結果：{pred_label}")
+    print("各類別機率：")
+    for label, prob in zip(le.classes_, probs):
+        print(f"{label}: {prob:.4f}")
 
     cont = input("是否有下一筆輸入？(y/n): ").strip().lower()
     if cont != 'y':

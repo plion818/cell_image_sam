@@ -1,3 +1,4 @@
+import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -7,6 +8,15 @@ import torch.nn as nn
 import torch.optim as optim
 from collections import Counter
 import numpy as np
+
+# 設定隨機種子以確保可重現性
+import random
+import numpy as np
+import torch
+random_seed = 1234
+random.seed(random_seed)
+np.random.seed(random_seed)
+torch.manual_seed(random_seed)
 
 # 讀取 CSV，路徑以 cell_sam 專案根目錄為基準
 import os
@@ -72,8 +82,8 @@ class CoverageDataset(Dataset):
 train_dataset = CoverageDataset(X_train, y_train)
 val_dataset = CoverageDataset(X_val, y_val)
 
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=32)
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=4, shuffle=False)
 
 # 顯示類別對應
 # print("label 對應：", dict(zip(le.classes_, le.transform(le.classes_))))
@@ -163,3 +173,8 @@ if __name__ == "__main__":
     model_save_path = os.path.join(script_dir, 'mlp_classifier.pth')
     torch.save(model.state_dict(), model_save_path)
     print(f'模型已儲存為 {model_save_path}')
+
+    # 儲存 scaler
+    scaler_save_path = os.path.join(script_dir, 'scaler.pkl')
+    joblib.dump(scaler, scaler_save_path)
+    print(f'scaler 已儲存為 {scaler_save_path}')
